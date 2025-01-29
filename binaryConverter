@@ -1,0 +1,50 @@
+import numpy as np
+
+# Load the numpy files
+boston_input = np.load("boston_input.npy")
+boston_weights = np.load("boston_weights.npy")
+
+# Flatten the 3D array into 2D (combine the first two dimensions into one)
+boston_weights_2D = boston_weights.reshape(-1, boston_weights.shape[-1])
+print(boston_input)
+
+def decimal_to_signed_8bit_binary(decimal_list):
+    binary_list = []
+    
+    for num in decimal_list:
+        # Cast the number to a larger integer type to avoid overflow
+        num = int(num)
+
+        # Handle numbers outside the int8 range
+        if num < -128 or num > 127:
+            print(f"Warning: {num} is out of the int8 range.")
+            num = num % 256  # Wrap around to fit into 8 bits
+
+        if num < 0:
+            # Convert to two's complement
+            num = (1 << 8) + num  # This gives the correct two's complement
+        
+        # Format as 8-bit binary
+        binary_representation = format(num & 0xFF, '08b')  # Mask to ensure it's 8 bits
+        binary_list.append(binary_representation)
+    
+    return binary_list
+
+# Convert to binary format manually and write to file
+with open("weightstestertrialAAAAAAAAAAAAA.mem", "w") as f:
+    for row in boston_weights_2D:
+        # Process each value to get its 2s complement binary representation
+        binary_row = ''.join(decimal_to_signed_8bit_binary(row))
+        f.write(binary_row + '\n')
+
+with open("inputstestertrialAAAAAAAAAAAAA.mem", "w") as f:
+    for row in boston_input:
+        # Process each value to get its 2s complement binary representation
+        binary_row = ''.join(decimal_to_signed_8bit_binary(row))
+        f.write(binary_row + '\n')
+
+# Example usage of binary conversion
+#binary_results = decimal_to_signed_8bit_binary(boston_weights_2D.flatten())
+
+#for dec, bin in zip(boston_weights_2D.flatten(), binary_results):
+#    print(f"{dec} -> {bin}")
